@@ -1,7 +1,26 @@
+#ifndef PIXEL_H
+#define PIXEL_H
+
+
 #include <vector>
 #include <iostream>
 #include <math.h>
-#include <algorithm>  
+#include <algorithm>
+
+std::vector<float> RGBtoHSV(std::vector<float> input);
+std::vector<float> RGBtoHSL(std::vector<float> input);
+std::vector<float> RGBtoCMYK(std::vector<float> input);
+std::vector<float> RGBtoXYZ(std::vector<float> input);
+std::vector<float> RGBtoCIELab(std::vector<float> input);
+std::vector<float> XYZtoRGB(std::vector<float> input);
+std::vector<float> HSVtoRGB(std::vector<float> input);
+std::vector<float> HSLtoRGB(std::vector<float> input);
+std::vector<float> CMYKtoRGB(std::vector<float> input);
+std::vector<float> CIELabtoRGB(std::vector<float> input);
+std::vector<float> XYZtoCIELab(std::vector<float> input);
+std::vector<float> CIELabtoXYZ(std::vector<float> input);
+
+
 std::vector<float> RGBtoHSV(std::vector<float> input)
 {
 
@@ -164,6 +183,14 @@ std::vector<float> RGBtoXYZ(std::vector<float> input)
     std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
+std::vector<float> RGBtoCIELab(std::vector<float> input)
+{
+
+    std::vector<float> output(3);
+    output = XYZtoCIELab(RGBtoXYZ(input));
+    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
+    return output;
+}
 std::vector<float> XYZtoRGB(std::vector<float> input)
 {
 
@@ -296,6 +323,14 @@ std::vector<float> CMYKtoRGB(std::vector<float> input)
     std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
+std::vector<float> CIELabtoRGB(std::vector<float> input)
+{
+
+    std::vector<float> output(3);
+    output = XYZtoRGB(CIELabtoXYZ(input));
+    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
+    return output;
+}
 std::vector<float> XYZtoCIELab(std::vector<float> input)
 {
     float ref_X = 95.047;
@@ -307,12 +342,12 @@ std::vector<float> XYZtoCIELab(std::vector<float> input)
     float Z = (input[2] / ref_Z);
 
     if (X > 0.008856)
-        X = std::powf(X, (1.0f / 3));
+        X = powf(X, (1.0f / 3));
     else
         X = (7.787 * X) + (16.0f / 116);
 
     if (Y > 0.008856)
-        Y = std::powf(Y, (1.0f / 3));
+        Y = powf(Y, (1.0f / 3));
     else
         Y = (7.787 * Y) + (16.0f / 116);
 
@@ -329,7 +364,6 @@ std::vector<float> XYZtoCIELab(std::vector<float> input)
     std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
-
 std::vector<float> CIELabtoXYZ(std::vector<float> input)
 {
     float ref_X = 95.047;
@@ -340,18 +374,18 @@ std::vector<float> CIELabtoXYZ(std::vector<float> input)
     float X = (input[1] / 500) + Y;
     float Z = Y - (input[2] / 200);
 
-    if (std::powf(Y, 3.f) > 0.008856)
-        Y = std::powf(Y, 3.f);
+    if (powf(Y, 3.f) > 0.008856)
+        Y = powf(Y, 3.f);
     else
         Y = (Y - (16 / 116)) / 7.787;
 
-    if (std::powf(X, 3.f) > 0.008856)
-        X = std::powf(X, 3.f);
+    if (powf(X, 3.f) > 0.008856)
+        X = powf(X, 3.f);
     else
         X = (X - (16 / 116)) / 7.787;
 
-    if (std::powf(Z, 3.f) > 0.008856)
-        Z = std::powf(Z, 3.f);
+    if (powf(Z, 3.f) > 0.008856)
+        Z = powf(Z, 3.f);
     else
         Z = (Z - (16 / 116)) / 7.787;
 
@@ -363,19 +397,6 @@ std::vector<float> CIELabtoXYZ(std::vector<float> input)
     std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
-std::vector<float> CIELabtoRGB(std::vector<float> input)
-{
 
-    std::vector<float> output(3);
-    output = XYZtoRGB(CIELabtoXYZ(input));
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
-    return output;
-}
-std::vector<float> RGBtoCIELab(std::vector<float> input)
-{
 
-    std::vector<float> output(3);
-    output = XYZtoCIELab(RGBtoXYZ(input));
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
-    return output;
-}
+#endif // PIXEL_H
