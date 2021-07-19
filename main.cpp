@@ -4,174 +4,62 @@
 #include <map>
 #include <vector>
 #include "Pixel.h"
+#include <sstream>
+#include "Image.h"
+#include "RGB.h"
 
-#define sRGB 0
-#define HSV 1
-#define HSL 2
-#define CMYK 3
-#define XYZ 4
-#define CIELabD65 5
-
-
-void transformSpaces(std::string fromSpace, std::string toSpace, std::vector<float> params)
-{
-    std::map<std::string, int> colorSpaces={{"sRGB", sRGB},{"HSV", HSV},{"HSL", HSL},{"CMYK", CMYK},{"XYZ", XYZ},{"CIELab(D65)", CIELabD65}};
-    int fSpace = colorSpaces.at(fromSpace);
-    int tSpace = colorSpaces.at(toSpace);
-    if(fSpace == -1 || tSpace == -1)
-    {
-        std::cout<<"Espacios de color no validos"<<std::endl;
-        return;
-    }
-    std::vector<float>result;
-    switch (fSpace)
-    {
-        case sRGB:
-            switch (tSpace)
-            {
-                case HSV:
-                    result = RGBtoHSV(params);
-                break;
-                case HSL:
-                    result = RGBtoHSL(params);
-                break;
-                case CMYK:
-                    result = RGBtoCMYK(params);
-                break;
-                case XYZ:
-                    result = RGBtoXYZ(params);
-                break;
-                case CIELabD65:
-                    result = RGBtoCIELab(params);
-                break;
-            }
-        break;
-
-        case HSV:
-        result = HSVtoRGB(params);
-        switch (tSpace)
-            {
-                case sRGB:
-                    result = HSVtoRGB(params);
-                break;
-                case HSL:
-                    result = RGBtoHSL(result);
-                break;
-                case CMYK:
-                    result = RGBtoCMYK(result);
-                break;
-                case XYZ:
-                    result = RGBtoXYZ(result);
-                break;
-                case CIELabD65:
-                    result = RGBtoCIELab(result);
-                break;
-            }
-        break;
-
-        case HSL:
-        result = HSLtoRGB(params);
-        switch (tSpace)
-        {
-            case sRGB:
-                result = HSLtoRGB(params);
-            break;
-            case HSV:
-                result = RGBtoHSV(result);
-            break;
-            case CMYK:
-                result = RGBtoCMYK(result);
-            break;
-            case XYZ:
-                result = RGBtoXYZ(result);
-            break;
-            case CIELabD65:
-                result = RGBtoCIELab(result);
-            break;
-        }
-        break;
-
-        case CMYK:
-        result = CMYKtoRGB(params);
-        switch (tSpace)
-        {
-            case sRGB:
-                result = CMYKtoRGB(params);
-            break;
-            case HSV:
-                result = RGBtoCMYK(result);
-            break;
-            case HSL:
-                result = RGBtoHSL(result);
-            break;
-            case XYZ:
-                result = RGBtoXYZ(result);
-            break;
-            case CIELabD65:
-                result = RGBtoCIELab(result);
-            break;
-        }
-        break;
-
-        case XYZ:
-        result = XYZtoRGB(params);
-        switch (tSpace)
-        {
-            case sRGB:
-                result = XYZtoRGB(params);
-            break;
-            case HSV:
-                result = RGBtoHSV(result);
-            break;
-            case HSL:
-                result = RGBtoHSL(result);
-            break;
-            case CMYK:
-                result = RGBtoCMYK(result);
-            break;
-            case CIELabD65:
-                result = RGBtoCIELab(result);
-            break;
-        }
-        break;
-
-        case CIELabD65:
-        result = CIELabtoRGB(params);
-        switch (tSpace)
-        {
-            case sRGB:
-                result = CIELabtoRGB(params);
-            break;
-            case HSV:
-                result = RGBtoHSV(result);
-            break;
-            case HSL:
-                result = RGBtoHSL(result);
-            break;
-            case CMYK:
-                result = RGBtoCMYK(result);
-            break;
-            case XYZ:
-                result = RGBtoXYZ(result);
-            break;
-        }
-        break;
-    }
+bool isFloat(std::string myString ) {
+    std::istringstream iss(myString);
+    float f;
+    iss >> std::noskipws >> f; // noskipws considers leading whitespace invalid
+    // Check the entire string was consumed and if either failbit or badbit is set
+    return iss.eof() && !iss.fail();
 }
 
-int main(int argc, char *argv[])
+void checkArguments(int argc, char*argv[])
 {
-    if(argc >= 6)
+    if(argc == 3)
     {
-        std::vector<float> params(argc-3,{});
-        for(int i=3 ; i<argc ; i++)
-            params[i-3] = atof(argv[i]);
-        transformSpaces(argv[1] , argv[2] , params);
+        Image <RGB<uchar>> im;
+        im.Read(argv[1]);
+        im.Update();
+        im.changeLightHSL(atof(argv[2]));
+        im.Update();
+    }
+    //Minima cantidad de argumentos
+    else if(argc == 6)
+    {
+        std::vector<float> params(3,{});
+        for(int i=1 ; i<4; i++)
+            params[i-1] = atof(argv[i]);
+        transformSpaces(argv[4] , argv[5] , params);
+    }
+    //Verificacion si es que el cuarto argumento es un flotante para CMYK
+    else if(argc == 7)
+    {
+        std::string argumento4 = argv[4];
+        std::string argumento5 = argv[5];
+        if(isFloat(argv[4]) && argumento5=="CMYK")
+        {
+            std::vector<float> params(4,{});
+            for(int i=1 ; i<5 ; i++)
+                params[i-1] = atof(argv[i]);
+            transformSpaces(argv[5] , argv[6] , params);
+        }
+        else
+        {
+            std::cout<<"Entradas erroneas"<<std::endl;
+        }
     }
     else
     {
-        std::cout<<"Cantidad invalida de argumentos"<<std::endl;
-        std::cout<<"Use el siguiente formato: <EspacioDeColorOrigen> <EspacioDeColorDestino> <Parametro1> <Parametro2>..."<<std::endl;
+        std::cout<<"Numero incorrecto de entradas"<<std::endl;
     }
+}
+
+
+int main(int argc, char *argv[])
+{
+    checkArguments(argc, argv);
     return 0;
 }

@@ -1,11 +1,18 @@
 #ifndef PIXEL_H
 #define PIXEL_H
 
-
 #include <vector>
 #include <iostream>
 #include <math.h>
 #include <algorithm>
+#include <map>
+
+#define sRGB 0
+#define HSV 1
+#define HSL 2
+#define CMYK 3
+#define XYZ 4
+#define CIELabD65 5
 
 std::vector<float> RGBtoHSV(std::vector<float> input);
 std::vector<float> RGBtoHSL(std::vector<float> input);
@@ -19,7 +26,6 @@ std::vector<float> CMYKtoRGB(std::vector<float> input);
 std::vector<float> CIELabtoRGB(std::vector<float> input);
 std::vector<float> XYZtoCIELab(std::vector<float> input);
 std::vector<float> CIELabtoXYZ(std::vector<float> input);
-
 
 std::vector<float> RGBtoHSV(std::vector<float> input)
 {
@@ -72,7 +78,6 @@ std::vector<float> RGBtoHSV(std::vector<float> input)
     output[0] = H;
     output[1] = S * 100;
     output[2] = V * 100;
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> RGBtoHSL(std::vector<float> input)
@@ -126,7 +131,6 @@ std::vector<float> RGBtoHSL(std::vector<float> input)
     output[0] = H;
     output[1] = S * 100;
     output[2] = L * 100;
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> RGBtoCMYK(std::vector<float> input)
@@ -145,7 +149,6 @@ std::vector<float> RGBtoCMYK(std::vector<float> input)
     output[2] = Y * 100;
     output[3] = K * 100;
 
-    std::cout << output[0] << "," << output[1] << "," << output[2] << "," << output[3] << std::endl;
     return output;
 }
 std::vector<float> RGBtoXYZ(std::vector<float> input)
@@ -180,7 +183,6 @@ std::vector<float> RGBtoXYZ(std::vector<float> input)
     output[1] = R_p * 0.2126f + G_p * 0.7152f + B_p * 0.0722f;
     output[2] = R_p * 0.0193f + G_p * 0.1192f + B_p * 0.9505f;
 
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> RGBtoCIELab(std::vector<float> input)
@@ -188,7 +190,6 @@ std::vector<float> RGBtoCIELab(std::vector<float> input)
 
     std::vector<float> output(3);
     output = XYZtoCIELab(RGBtoXYZ(input));
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> XYZtoRGB(std::vector<float> input)
@@ -222,7 +223,6 @@ std::vector<float> XYZtoRGB(std::vector<float> input)
     output[1] = (int)(G * 255);
     output[2] = (int)(B * 255);
 
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> HSVtoRGB(std::vector<float> input)
@@ -262,7 +262,6 @@ std::vector<float> HSVtoRGB(std::vector<float> input)
     output[0] = R;
     output[1] = G;
     output[2] = B;
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> HSLtoRGB(std::vector<float> input)
@@ -301,26 +300,23 @@ std::vector<float> HSLtoRGB(std::vector<float> input)
     output[0] = R;
     output[1] = G;
     output[2] = B;
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> CMYKtoRGB(std::vector<float> input)
 {
-
     std::vector<float> output(3);
     float C = input[0] / 100;
     float M = input[1] / 100;
     float Y = input[2] / 100;
     float K = input[3] / 100;
 
-    int R = 255 * (1 - C) * (1 - K);
-    int G = 255 * (1 - M) * (1 - K);
-    int B = 255 * (1 - Y) * (1 - K);
+    int R = round(255 * (1 - C) * (1 - K));
+    int G = round(255 * (1 - M) * (1 - K));
+    int B = round(255 * (1 - Y) * (1 - K));
 
     output[0] = R;
     output[1] = G;
     output[2] = B;
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> CIELabtoRGB(std::vector<float> input)
@@ -328,7 +324,6 @@ std::vector<float> CIELabtoRGB(std::vector<float> input)
 
     std::vector<float> output(3);
     output = XYZtoRGB(CIELabtoXYZ(input));
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> XYZtoCIELab(std::vector<float> input)
@@ -361,7 +356,6 @@ std::vector<float> XYZtoCIELab(std::vector<float> input)
     output[2] = 200 * (Y - Z);
 
 
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 std::vector<float> CIELabtoXYZ(std::vector<float> input)
@@ -393,10 +387,158 @@ std::vector<float> CIELabtoXYZ(std::vector<float> input)
     output[1] = ref_Y * Y;
     output[2] = ref_Z * Z;
 
-
-    std::cout << output[0] << "," << output[1] << "," << output[2] << std::endl;
     return output;
 }
 
+void transformSpaces(std::string fromSpace, std::string toSpace, std::vector<float> params)
+{
+    std::map<std::string, int> colorSpaces={{"sRGB", sRGB},{"HSV", HSV},{"HSL", HSL},{"CMYK", CMYK},{"XYZ", XYZ},{"CIELab (D65)", CIELabD65}};
+    int fSpace = colorSpaces.at(fromSpace);
+    int tSpace = colorSpaces.at(toSpace);
+    if(fSpace == CMYK && params.size() !=4)
+    {
+        std::cout<<"Numero incorrecto de entradas"<<std::endl;
+    }
+
+    std::vector<float>result;
+    switch (fSpace)
+    {
+        case sRGB:
+            switch (tSpace)
+            {
+                case HSV:
+                    result = RGBtoHSV(params);
+                break;
+                case HSL:
+                    result = RGBtoHSL(params);
+                break;
+                case CMYK:
+                    result = RGBtoCMYK(params);
+                break;
+                case XYZ:
+                    result = RGBtoXYZ(params);
+                break;
+                case CIELabD65:
+                    result = RGBtoCIELab(params);
+                break;
+            }
+        break;
+
+        case HSV:
+        result = HSVtoRGB(params);
+        switch (tSpace)
+            {
+                case sRGB:
+                    result = HSVtoRGB(params);
+                break;
+                case HSL:
+                    result = RGBtoHSL(result);
+                break;
+                case CMYK:
+                    result = RGBtoCMYK(result);
+                break;
+                case XYZ:
+                    result = RGBtoXYZ(result);
+                break;
+                case CIELabD65:
+                    result = RGBtoCIELab(result);
+                break;
+            }
+        break;
+
+        case HSL:
+        result = HSLtoRGB(params);
+        switch (tSpace)
+        {
+            case sRGB:
+                result = HSLtoRGB(params);
+            break;
+            case HSV:
+                result = RGBtoHSV(result);
+            break;
+            case CMYK:
+                result = RGBtoCMYK(result);
+            break;
+            case XYZ:
+                result = RGBtoXYZ(result);
+            break;
+            case CIELabD65:
+                result = RGBtoCIELab(result);
+            break;
+        }
+        break;
+
+        case CMYK:
+        result = CMYKtoRGB(params);
+        switch (tSpace)
+        {
+            case sRGB:
+                result = CMYKtoRGB(params);
+            break;
+            case HSV:
+                result = RGBtoCMYK(result);
+            break;
+            case HSL:
+                result = RGBtoHSL(result);
+            break;
+            case XYZ:
+                result = RGBtoXYZ(result);
+            break;
+            case CIELabD65:
+                result = RGBtoCIELab(result);
+            break;
+        }
+        break;
+
+        case XYZ:
+        result = XYZtoRGB(params);
+        switch (tSpace)
+        {
+            case sRGB:
+                result = XYZtoRGB(params);
+            break;
+            case HSV:
+                result = RGBtoHSV(result);
+            break;
+            case HSL:
+                result = RGBtoHSL(result);
+            break;
+            case CMYK:
+                result = RGBtoCMYK(result);
+            break;
+            case CIELabD65:
+                result = XYZtoCIELab(result);
+            break;
+        }
+        break;
+
+        case CIELabD65:
+        result = CIELabtoRGB(params);
+        switch (tSpace)
+        {
+            case sRGB:
+                result = CIELabtoRGB(params);
+            break;
+            case HSV:
+                result = RGBtoHSV(result);
+            break;
+            case HSL:
+                result = RGBtoHSL(result);
+            break;
+            case CMYK:
+                result = RGBtoCMYK(result);
+            break;
+            case XYZ:
+                result = CIELabtoXYZ(result);
+            break;
+        }
+        break;
+    }
+    for(std::size_t i=0 ; i<result.size() ; i++)
+    {
+        std::cout<<result[i]<<" ";
+    }
+    std::cout<<std::endl;
+}
 
 #endif // PIXEL_H
